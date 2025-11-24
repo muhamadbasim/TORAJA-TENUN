@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tenun Cepat Toraja</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles to enhance the workshop/crafting theme */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            /* Light blue/grey background */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .game-container {
+            max-width: 700px;
+            width: 100%;
+            background-color: #ffffff;
+            border: 4px solid #333;
+            /* Strong border for a robust look */
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+        }
+
+        .blueprint-item {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 80px;
+            height: 80px;
+            border: 2px dashed #9ca3af;
+            /* Dashed line for blueprint look */
+            border-radius: 8px;
+            margin: 4px;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .blueprint-item img {
+            opacity: 0.3;
+            /* Low opacity for placeholder/uncompleted blueprint item */
+            transition: opacity 0.3s;
+        }
+
+        .blueprint-item.completed {
+            border: 2px solid #10b981;
+            /* Green border when completed */
+            background-color: #d1fae5;
+        }
+
+        .blueprint-item.completed img {
+            opacity: 1;
+            /* Full opacity when completed */
+        }
+
+        .component-btn {
+            background-color: #e2e8f0;
+            /* Base color for fabric/thread */
+            border: 2px solid #475569;
+            box-shadow: 0 4px 0 #475569;
+            transition: all 0.1s;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .component-btn:active {
+            box-shadow: 0 1px 0 #475569;
+            transform: translateY(3px);
+        }
+
+        .btn-primary {
+            background-color: #9a3412;
+            /* Deep red/brown, inspired by Tenun colors */
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            box-shadow: 0 4px 0 #7c2d12;
+            transition: all 0.1s;
+        }
+
+        .btn-primary:active {
+            box-shadow: 0 1px 0 #7c2d12;
+            transform: translateY(3px);
+        }
+
+        .motif-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game-container">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6 border-b pb-2">
+            Tenun Cepat Toraja
+        </h1>
+        <p class="text-center text-gray-600 mb-4">
+            Padankan motif kain tenun yang tepat secepat mungkin. Batas waktu: 30 detik!
+        </p>
+
+        <!-- Status Panel -->
+        <div class="flex justify-between items-center bg-gray-100 p-4 rounded-lg mb-6 shadow-inner">
+            <div class="text-lg font-medium">
+                Waktu: <span id="timer" class="font-bold text-red-600">0</span>s
+            </div>
+            <div class="text-lg font-medium">
+                Skor: <span id="score" class="font-bold text-blue-600">0</span>
+            </div>
+        </div>
+
+        <!-- Blueprint Area (What needs to be built) -->
+        <h2 class="text-xl font-semibold mb-3 text-gray-700">Pola Tenun (Blueprint):</h2>
+        <div id="blueprint-display"
+            class="flex flex-wrap justify-center bg-red-50 p-4 rounded-lg mb-6 min-h-[90px] shadow">
+            <!-- Blueprint items will be inserted here -->
+        </div>
+
+        <!-- Component Selection Area (The interactive buttons) -->
+        <h2 class="text-xl font-semibold mb-3 text-gray-700">Pilih Motif Benang:</h2>
+        <div id="component-area"
+            class="flex justify-center flex-wrap gap-4 p-4 bg-gray-200 rounded-lg min-h-[100px] shadow-lg">
+            <!-- Component buttons will be inserted here -->
+        </div>
+
+        <!-- Game Control and Messages -->
+        <div class="mt-8 text-center">
+            <button id="start-btn" class="btn-primary">
+                Mulai Menenun Baru
+            </button>
+            <div id="message" class="text-xl mt-4 font-bold text-green-700">
+                Tekan Mulai untuk memuat pola tenun!
+            </div>
+        </div>
+
+        <!-- Modal for Game Over -->
+        <div id="game-over-modal"
+            class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4">
+            <div class="bg-white p-8 rounded-xl shadow-2xl text-center max-w-sm w-full border-t-8 border-orange-500">
+                <h3 class="text-3xl font-bold mb-4 text-gray-800">Waktu Habis!</h3>
+                <p class="text-xl mb-6">Skor Akhir Anda:</p>
+                <p id="final-score" class="text-5xl font-extrabold text-orange-600 mb-8">0</p>
+                <button id="restart-modal-btn" class="btn-primary w-full">
+                    Coba Lagi (Mulai Baru)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables for game state
+        let gameInterval;
+        let timer = 30; // 30 seconds limit
+        let score = 0;
+        let isPlaying = false;
+        let currentStep = 0;
+
+        // Toraja Motifs (using actual image placeholders with distinct colors and text labels)
+        const MOTIFS = [
+            // Pa'qura'pan (Dark Red/Brown, Text: QURA'PAN)
+            { name: 'Pa\'qura\'pan', text: 'QURA\'PAN', color: '651c1c', textColor: 'ffffff' },
+            // Pa'kapurak (Dark Green/Forest, Text: KAPURAK)
+            { name: 'Pa\'kapurak', text: 'KAPURAK', color: '14532d', textColor: 'ffffff' },
+            // Pa'kadang-kadang (Dark Blue/Indigo, Text: KADANG)
+            { name: 'Pa\'kadang-kadang', text: 'KADANG', color: '1e40af', textColor: 'ffffff' },
+            // Pa'manuk (Yellow/Gold/Brown, Text: MANUK)
+            { name: 'Pa\'manuk', text: 'MANUK', color: '854d0e', textColor: 'ffffff' }
+        ];
+
+        // An array of only the motif names for easy selection
+        const MOTIF_NAMES = MOTIFS.map(m => m.name);
+
+        // The blueprint: an array of required motifs for assembly
+        const BLUEPRINTS = [
+            ['Pa\'qura\'pan', 'Pa\'kapurak', 'Pa\'qura\'pan', 'Pa\'manuk', 'Pa\'kapurak', 'Pa\'qura\'pan', 'Pa\'manuk', 'Pa\'kadang-kadang'],
+            ['Pa\'kadang-kadang', 'Pa\'manuk', 'Pa\'qura\'pan', 'Pa\'kapurak', 'Pa\'manuk', 'Pa\'qura\'pan', 'Pa\'kapurak', 'Pa\'kadang-kadang'],
+            ['Pa\'kapurak', 'Pa\'qura\'pan', 'Pa\'manuk', 'Pa\'kadang-kadang', 'Pa\'qura\'pan', 'Pa\'manuk', 'Pa\'kapurak', 'Pa\'qura\'pan']
+        ];
+        let currentBlueprint = [];
+
+        // DOM elements
+        const timerEl = document.getElementById('timer');
+        const scoreEl = document.getElementById('score');
+        const startBtn = document.getElementById('start-btn');
+        const blueprintDisplay = document.getElementById('blueprint-display');
+        const componentArea = document.getElementById('component-area');
+        const messageEl = document.getElementById('message');
+        const gameOverModal = document.getElementById('game-over-modal');
+        const finalScoreEl = document.getElementById('final-score');
+        const restartModalBtn = document.getElementById('restart-modal-btn');
+
+        // Utility function to get motif details
+        function getMotifDetails(motifName) {
+            return MOTIFS.find(m => m.name === motifName) || { name: 'unknown', text: '?', color: '999999', textColor: 'ffffff' };
+        }
+
+        // Utility function to create an image element for the motif using placehold.co
+        function createMotifElement(motifName, blueprintMode = false, size = '80') {
+            const motif = getMotifDetails(motifName);
+            const textToDisplay = motif.text.replace(/'/g, ''); // Remove quotes for clean URL
+
+            // Image URL: widthxheight/bgcolor/textcolor?text=Text
+            const imageUrl = `https://placehold.co/${size}x${size}/${motif.color}/${motif.textColor}?text=${textToDisplay}&font=Inter`;
+
+            const img = document.createElement('img');
+            img.className = 'motif-image';
+            img.src = imageUrl;
+            img.alt = `Motif ${motifName}`;
+
+            // Add onerror fallback
+            img.onerror = function () {
+                this.src = `https://placehold.co/${size}x${size}/cccccc/4b5563?text=ERROR`;
+            };
+
+            return img;
+        }
+
+        // --- Game Setup Functions ---
+
+        function initializeBlueprint() {
+            // Select a random blueprint
+            const randomIndex = Math.floor(Math.random() * BLUEPRINTS.length);
+            currentBlueprint = BLUEPRINTS[randomIndex];
+
+            blueprintDisplay.innerHTML = '';
+            currentBlueprint.forEach((motif, index) => {
+                const item = document.createElement('div');
+                item.className = 'blueprint-item';
+                item.id = `bp-item-${index}`;
+
+                // Blueprint mode: the image is inserted with low opacity
+                item.appendChild(createMotifElement(motif, true, '80'));
+
+                blueprintDisplay.appendChild(item);
+            });
+        }
+
+        function generateComponents() {
+            componentArea.innerHTML = '';
+            const requiredMotif = currentBlueprint[currentStep];
+            const componentOptions = new Set();
+
+            // Add the correct motif
+            componentOptions.add(requiredMotif);
+
+            // Add 3 random decoy motifs
+            while (componentOptions.size < 4) {
+                const randomMotif = MOTIF_NAMES[Math.floor(Math.random() * MOTIF_NAMES.length)];
+                componentOptions.add(randomMotif);
+            }
+
+            // Convert set to array and shuffle for random button order
+            let optionsArray = Array.from(componentOptions);
+            optionsArray.sort(() => Math.random() - 0.5);
+
+            optionsArray.forEach(motif => {
+                const btn = document.createElement('button');
+                // The button size is w-24 h-24 to accommodate the 80x80 image and padding
+                btn.className = 'component-btn w-24 h-24 rounded-xl flex justify-center items-center text-gray-700 hover:bg-gray-300';
+                btn.dataset.motif = motif;
+
+                // Component mode: the image is inserted normally
+                btn.appendChild(createMotifElement(motif, false, '80'));
+                btn.addEventListener('click', handleComponentClick);
+                componentArea.appendChild(btn);
+            });
+
+            // Highlight the current target blueprint step
+            document.querySelectorAll('.blueprint-item').forEach((item, index) => {
+                item.style.borderColor = (index === currentStep) ? '#9a3412' : (index < currentStep ? '#10b981' : '#9ca3af');
+                item.style.transform = (index === currentStep) ? 'scale(1.1)' : 'scale(1)';
+            });
+        }
+
+        // --- Game Flow Logic ---
+
+        function startGame() {
+            if (isPlaying) return;
+
+            // Reset state
+            timer = 30;
+            score = 0;
+            currentStep = 0;
+            isPlaying = true;
+
+            // Update UI
+            timerEl.textContent = timer;
+            scoreEl.textContent = score;
+            messageEl.textContent = 'Memulai proses menenun...!';
+            startBtn.classList.add('hidden');
+            gameOverModal.classList.add('hidden');
+
+            // Set up blueprint and initial components
+            initializeBlueprint();
+            generateComponents();
+
+            // Start timer
+            gameInterval = setInterval(updateTimer, 1000);
+        }
+
+        function updateTimer() {
+            timer--;
+            timerEl.textContent = timer;
+
+            if (timer <= 5) {
+                timerEl.classList.replace('text-red-600', 'text-red-800');
+            }
+
+            if (timer <= 0) {
+                endGame();
+            }
+        }
+
+        function handleComponentClick(event) {
+            if (!isPlaying) return;
+
+            const selectedMotif = event.currentTarget.dataset.motif;
+            const requiredMotif = currentBlueprint[currentStep];
+            const currentBlueprintItem = document.getElementById(`bp-item-${currentStep}`);
+
+            if (selectedMotif === requiredMotif) {
+                // Correct match!
+                score += 10;
+                scoreEl.textContent = score;
+                messageEl.textContent = 'MOTIF TEPAT! +10 Skor.';
+
+                // Animate and mark as complete
+                currentBlueprintItem.classList.add('completed');
+                // The image opacity is controlled by the .completed class in CSS now
+
+                // Check for game completion
+                if (currentStep < currentBlueprint.length - 1) {
+                    currentStep++;
+                    generateComponents();
+                } else {
+                    // Blueprint complete!
+                    score += timer * 5; // Bonus for remaining time
+                    scoreEl.textContent = score;
+                    messageEl.textContent = `KAIN SELESAI DITENUN! Bonus Waktu: +${timer * 5}!`;
+                    endGame(true);
+                }
+            } else {
+                // Wrong match! Penalty
+                score = Math.max(0, score - 5);
+                timer = Math.max(0, timer - 3); // 3 second penalty
+                scoreEl.textContent = score;
+                timerEl.textContent = timer;
+                messageEl.textContent = 'SALAH! -5 Skor, -3s Waktu.';
+
+                // Blink component area red for visual feedback
+                componentArea.classList.add('bg-red-400');
+                setTimeout(() => componentArea.classList.remove('bg-red-400'), 200);
+
+                if (timer <= 0) {
+                    endGame();
+                }
+            }
+        }
+
+        function endGame(completed = false) {
+            isPlaying = false;
+            clearInterval(gameInterval);
+
+            // Show Game Over Modal
+            finalScoreEl.textContent = score;
+            if (completed) {
+                document.querySelector('#game-over-modal h3').textContent = 'TENUNAN BERHASIL!';
+                document.querySelector('#game-over-modal').classList.add('border-green-500');
+                document.querySelector('#game-over-modal').classList.remove('border-orange-500');
+            } else {
+                document.querySelector('#game-over-modal h3').textContent = 'WAKTU HABIS!';
+                document.querySelector('#game-over-modal').classList.remove('border-green-500');
+                document.querySelector('#game-over-modal').classList.add('border-orange-500');
+            }
+            gameOverModal.classList.remove('hidden');
+
+            // Clean up component area and show start button
+            componentArea.innerHTML = '<p class="text-gray-500">Permainan berakhir. Mulai baru.</p>';
+            startBtn.classList.remove('hidden');
+            timerEl.classList.replace('text-red-800', 'text-red-600');
+        }
+
+        // --- Event Listeners ---
+        startBtn.addEventListener('click', startGame);
+        restartModalBtn.addEventListener('click', () => {
+            gameOverModal.classList.add('hidden');
+            startGame();
+        });
+
+        // Initial setup on page load
+        window.onload = () => {
+            initializeBlueprint();
+            componentArea.innerHTML = '<p class="text-gray-500">Tekan tombol "Mulai Menenun Baru" untuk memulai tantangan merangkai motif!</p>';
+        };
+    </script>
+</body>
+
+</html>

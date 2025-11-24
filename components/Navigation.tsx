@@ -30,7 +30,7 @@ const Navigation: React.FC = () => {
             <span className="text-orange-600 absolute -right-3 top-0 opacity-0 group-hover:opacity-100 transition-opacity">.</span>
           </a>
 
-          <button 
+          <button
             onClick={() => setIsOpen(!isOpen)}
             className="group flex items-center gap-4 focus:outline-none"
           >
@@ -46,7 +46,7 @@ const Navigation: React.FC = () => {
 
       <AnimatePresence>
         {isOpen && (
-          <motion.div 
+          <motion.div
             initial={{ clipPath: "circle(0% at 100% 0%)" }}
             animate={{ clipPath: "circle(150% at 100% 0%)" }}
             exit={{ clipPath: "circle(0% at 100% 0%)" }}
@@ -54,42 +54,42 @@ const Navigation: React.FC = () => {
             className="fixed inset-0 bg-emerald-950 z-40 flex flex-col justify-center items-center text-[#fafaf9]"
           >
             <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between h-full py-32">
-                <div className="flex flex-col justify-between">
-                    <span className="text-sm uppercase tracking-widest text-emerald-500">Navigasi</span>
-                    <div className="text-xs text-emerald-400/60">
-                        <p>Sulawesi Selatan,</p>
-                        <p>Indonesia</p>
-                    </div>
+              <div className="flex flex-col justify-between">
+                <span className="text-sm uppercase tracking-widest text-emerald-500">Navigasi</span>
+                <div className="text-xs text-emerald-400/60">
+                  <p>Sulawesi Selatan,</p>
+                  <p>Indonesia</p>
                 </div>
+              </div>
 
-                <ul className="flex flex-col justify-center space-y-4">
+              <ul className="flex flex-col justify-center space-y-4">
                 {menuItems.map((item, i) => (
-                    <motion.li 
+                  <motion.li
                     key={item.label}
                     initial={{ opacity: 0, x: 100 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.1 * i + 0.3 }}
                     className="overflow-hidden"
+                  >
+                    <a
+                      href={item.href}
+                      onClick={() => setIsOpen(false)}
+                      className="text-5xl md:text-8xl serif hover:text-emerald-400 transition-colors block leading-[1.1] tracking-tight"
                     >
-                    <a 
-                        href={item.href}
-                        onClick={() => setIsOpen(false)}
-                        className="text-5xl md:text-8xl serif hover:text-emerald-400 transition-colors block leading-[1.1] tracking-tight"
-                    >
-                        {item.label}
+                      {item.label}
                     </a>
-                    </motion.li>
+                  </motion.li>
                 ))}
-                </ul>
+              </ul>
 
-                <div className="flex flex-col justify-end items-end">
-                     <span className="text-sm uppercase tracking-widest text-emerald-500 mb-4">Sosial</span>
-                     <div className="flex flex-col text-right space-y-2 font-medium text-emerald-100">
-                        <a href="#" className="hover:underline">Instagram</a>
-                        <a href="#" className="hover:underline">Twitter</a>
-                        <a href="#" className="hover:underline">Email</a>
-                     </div>
+              <div className="flex flex-col justify-end items-end">
+                <span className="text-sm uppercase tracking-widest text-emerald-500 mb-4">Sosial</span>
+                <div className="flex flex-col text-right space-y-2 font-medium text-emerald-100">
+                  <a href="#" className="hover:underline">Instagram</a>
+                  <a href="#" className="hover:underline">Twitter</a>
+                  <a href="#" className="hover:underline">Email</a>
                 </div>
+              </div>
             </div>
           </motion.div>
         )}
