@@ -156,11 +156,13 @@ const Gallery: React.FC = () => {
                       {item.title}
                     </h3>
                   </div>
-                  <div className="hidden md:flex flex-col items-end opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                    <span className="text-xs uppercase tracking-widest text-orange-600 mb-1">{item.pattern}</span>
-                    <span className="text-sm text-stone-500">{item.description}</span>
+                  <div className="flex items-center gap-8">
+                    <div className="hidden md:flex flex-col items-end opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                      <span className="text-xs uppercase tracking-widest text-orange-600 mb-1">{item.pattern}</span>
+                      <span className="text-sm text-stone-500">{item.description}</span>
+                    </div>
+                    <ArrowUpRight className="text-stone-300 group-hover:text-emerald-950 transition-colors opacity-0 group-hover:opacity-100" />
                   </div>
-                  <ArrowUpRight className="text-stone-300 group-hover:text-emerald-950 transition-colors opacity-0 group-hover:opacity-100" />
                 </div>
               </motion.div>
             ))}
