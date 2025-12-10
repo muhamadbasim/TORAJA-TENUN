@@ -32,9 +32,35 @@ const Footer: React.FC = () => {
           </div>
         </div>
 
-        <div className="mt-20 pt-8 border-t border-emerald-900 flex flex-col md:flex-row justify-between items-center text-xs text-emerald-700 uppercase tracking-wider">
+        <div className="mt-20 pt-8 border-t border-emerald-900 flex flex-col items-center text-center text-xs text-emerald-700 uppercase tracking-wider space-y-2">
           <p>&copy; {new Date().getFullYear()} Tenun Toraja Digital.</p>
           <p>Dirancang dengan Lokakarya</p>
+          <div className="flex gap-4 mt-2">
+            <a
+              href="/privacy-policy"
+              className="text-emerald-400 hover:text-white transition-colors normal-case"
+            >
+              Privacy Policy
+            </a>
+            <span className="text-emerald-700">|</span>
+            <a
+              href="/terms-of-service"
+              className="text-emerald-400 hover:text-white transition-colors normal-case"
+            >
+              Terms of Service
+            </a>
+          </div>
+          <p>
+            Created by{' '}
+            <a 
+              href="https://web.facebook.com/emb777?locale=id_ID" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-emerald-400 hover:text-white transition-colors"
+            >
+              Muhamad Basim
+            </a>
+          </p>
         </div>
       </div>
     </footer>
